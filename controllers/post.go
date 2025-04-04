@@ -94,3 +94,43 @@ func GetAllPosts(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"posts": posts})
 }
+
+func GetPostsByUsername(c *gin.Context) {
+	username := c.Param("username")
+
+	rows, err := models.DB.Query(`
+		SELECT posts.id, posts.user_id, posts.caption, posts.image_path, posts.created_at, users.username
+		FROM posts
+		JOIN users ON posts.user_id = users.id
+		WHERE users.username = ?
+		ORDER BY posts.created_at DESC
+	`, username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal ambil data"})
+		return
+	}
+	defer rows.Close()
+
+	var posts []gin.H
+	for rows.Next() {
+		var id, userID int
+		var caption, imagePath, uname string
+		var createdAt time.Time
+
+		err := rows.Scan(&id, &userID, &caption, &imagePath, &createdAt, &uname)
+		if err != nil {
+			continue
+		}
+
+		posts = append(posts, gin.H{
+			"id":         id,
+			"user_id":    userID,
+			"username":   uname,
+			"caption":    caption,
+			"image":      "/" + imagePath,
+			"created_at": createdAt.Format("2006-01-02 15:04"),
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"posts": posts})
+}

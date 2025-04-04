@@ -1,30 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Feed</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Social Feed</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    .card-img-top {
+      height: 350px;
+      object-fit: cover;
+    }
+
+    .navbar-brand {
+      font-weight: bold;
+      font-size: 1.5rem;
+    }
+
+    .username {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .card {
+      border: none;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+  </style>
 </head>
+
 <body class="bg-light">
-  <div class="container py-5">
-    <h2 class="mb-4">Feed Postingan</h2>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-light bg-white shadow-sm mb-4">
+    <div class="container d-flex justify-content-between">
+      <a class="navbar-brand" href="#">Partisi (Partai Sosialisasi)</a>
+      <div>
+        <button onclick="goToUpload()" class="btn btn-primary btn-sm me-2">+ Upload</button>
+        <button onclick="logout()" class="btn btn-outline-danger btn-sm">Logout</button>
+        <button onclick="window.location.href='myprofile.html'" class="btn btn-outline-dark btn-sm me-2">👤 Profile</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Feed Container -->
+  <div class="container">
     <div id="feed" class="row g-4"></div>
   </div>
 
   <script>
+    // Cek token login
+    const token = localStorage.getItem("token");
+
+    // Fungsi redirect ke upload
+    function goToUpload() {
+      if (!token) {
+        alert("Kamu harus login dulu untuk mengupload.");
+        window.location.href = "login.html";
+      } else {
+        window.location.href = "upload.html";
+      }
+    }
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem("token");
+      alert("Logout berhasil!");
+      window.location.href = "login.html";
+    }
+
+    // Ambil data postingan
     fetch("/api/posts")
       .then(res => res.json())
       .then(data => {
         const feed = document.getElementById("feed");
+        if (data.posts.length === 0) {
+          feed.innerHTML = "<p class='text-muted text-center'>Belum ada postingan 😔</p>";
+          return;
+        }
         data.posts.forEach(post => {
           const col = document.createElement("div");
-          col.className = "col-md-4";
+          col.className = "col-md-4 col-sm-6";
           col.innerHTML = `
             <div class="card h-100">
               <img src="${post.image}" class="card-img-top" alt="Post Image">
               <div class="card-body">
-                <h5 class="card-title">@${post.username}</h5>
+                <h6 class="username">
+                  <a href="profile.html?user=${post.username}" class="text-decoration-none">@${post.username}</a>
+                </h6>
                 <p class="card-text">${post.caption}</p>
                 <p class="text-muted small">${post.created_at}</p>
               </div>
@@ -35,4 +98,5 @@
       });
   </script>
 </body>
+
 </html>

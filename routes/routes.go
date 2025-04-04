@@ -16,5 +16,12 @@ func SetupRoutes(r *gin.Engine) {
 		api.POST("/upload", middleware.AuthMiddleware(), controllers.UploadPost)
 		
 		api.GET("/posts", controllers.GetAllPosts)
+
+		// user Profile
+		api.GET("/user/:username/posts", controllers.GetPostsByUsername)
+
+		// myProfile
+		api.GET("/me", middleware.AuthMiddleware(), controllers.GetMyProfile)
+
 	}
 }
