@@ -10,7 +10,7 @@ var DB *sql.DB
 
 func ConnectDatabase() {
 	var err error
-	DB, err = sql.Open("mysql", "partisimedia:@tcp(127.0.0.1:3306)/socialdb")
+	DB, err = sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/partisimedia?parseTime=true")
 	if err != nil {
 		panic(err)
 	}
@@ -21,4 +21,14 @@ func ConnectDatabase() {
 	}
 
 	fmt.Println("Connected to MySQL!")
+
+	var hasil string
+	row := DB.QueryRow("SELECT 'INI DB DARI GO'")
+	row.Scan(&hasil)
+	fmt.Println("Hasil uji coba DB:", hasil)
+
+	row = DB.QueryRow("SELECT DATABASE()")
+	row.Scan(&hasil)
+	fmt.Println("Nama database aktif dari Go:", hasil)
+
 }
